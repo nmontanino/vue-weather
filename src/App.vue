@@ -1,17 +1,17 @@
 <template>
   <div id="app">
-    <img src="./assets/logo.png">
-    <HelloWorld/>
+    <!-- <img src="./assets/logo.png"> -->
+    <Coordinates/>
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld'
+import Coordinates from './components/Coordinates'
 
 export default {
   name: 'App',
   components: {
-    HelloWorld
+    Coordinates
   }
 }
 </script>
