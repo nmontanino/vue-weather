@@ -1,6 +1,7 @@
 <template>
   <div>
-    <h1>{{ lat }}, {{ long }}</h1>
+    <h1>Coordinates: {{ lat }}, {{ long }}</h1>
+    <h2>Current Temperature: {{ weather.currently.temperature }}</h2>
   </div>
 </template>
 
@@ -10,7 +11,8 @@ export default {
   data () {
     return {
       lat: null,
-      long: null
+      long: null,
+      weather: {}
     }
   },
   methods: {
@@ -19,6 +21,19 @@ export default {
         navigator.geolocation.getCurrentPosition(position => {
           this.lat = position.coords.latitude
           this.long = position.coords.longitude
+
+          return new Promise((resolve, reject) => {
+            fetch(`http://localhost:3000?lat=${position.coords.latitude}&lon=${position.coords.longitude}`)
+              .then(response => {
+                console.log(response)
+                response.json()
+                  .then(data =>{
+                  console.log(data)
+                  this.weather = data
+            })
+            resolve(response)
+            })
+          })
         })
       }
     }
