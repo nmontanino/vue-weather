@@ -1,7 +1,11 @@
 <template>
   <div>
-    <h1>Coordinates: {{ lat }}, {{ long }}</h1>
-    <h2>Current Temperature: {{ weather.currently.temperature }}</h2>
+    <h1>Local Coordinates: {{ lat }}, {{ long }}</h1>
+    <h2>Current Temperature: {{ weather.currently.temperature }}&deg;F</h2>
+    <h2>Weather Summary: {{ weather.currently.summary }}</h2>
+    <h2>Dew Point: {{ weather.currently.dewPoint }}&deg;F</h2>
+    <h2>Humidity: {{ weather.currently.humidity * 100 }}%</h2>
+    <h2>Pressure: {{ weather.currently.pressure }} mbar</h2>
   </div>
 </template>
 
@@ -23,16 +27,15 @@ export default {
           this.long = position.coords.longitude
 
           return new Promise((resolve, reject) => {
-            fetch(`http://localhost:3000?lat=${position.coords.latitude}&lon=${position.coords.longitude}`)
+            fetch(`http://localhost:3000/weather?lat=${position.coords.latitude}&lon=${position.coords.longitude}`)
               .then(response => {
-                console.log(response)
                 response.json()
-                  .then(data =>{
-                  console.log(data)
-                  this.weather = data
-            })
-            resolve(response)
-            })
+                  .then(data => {
+                    console.log(data)
+                    this.weather = data
+                  })
+                resolve(response)
+              })
           })
         })
       }

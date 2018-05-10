@@ -1,21 +1,20 @@
 const express = require('express')
 const cors = require('cors')
+const DarkSky = require('dark-sky')
 const keys = require('./keys.js')
 
-const DarkSky = require('dark-sky')
 const darksky = new DarkSky(keys.darksky)
 
 const app = express()
 
 app.use(cors())
 
-app.get('/', (req, res) => {
+app.get('/weather', (req, res) => {
   let lat = req.query.lat
   let lon = req.query.lon
   darksky
       .latitude(lat)
       .longitude(lon)
-      .time('2016-01-28')
       .units('us')
       .language('en')
       .exclude('minutely,daily')
