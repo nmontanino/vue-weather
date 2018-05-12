@@ -12,19 +12,21 @@ app.use(cors())
 app.get('/weather', (req, res) => {
   let lat = req.query.lat
   let lon = req.query.lon
+  let units = req.query.units
+
   darksky
-      .latitude(lat)
-      .longitude(lon)
-      .units('us')
-      .language('en')
-      .exclude('minutely,hourly,flags')
-      .get()
-      .then(response => {
-        res.send(response)
-      })
-      .catch(error => {
-        res.send(error)
-      })
+    .latitude(lat)
+    .longitude(lon)
+    .units(units)
+    .language('en')
+    .exclude('minutely,hourly,flags')
+    .get()
+    .then(response => {
+      res.send(response)
+    })
+    .catch(error => {
+      res.send(error)
+    })
 })
 
 app.listen(3000, function () {
