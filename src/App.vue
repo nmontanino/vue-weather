@@ -1,17 +1,16 @@
 <template>
   <div id="app">
-    <!-- <img src="./assets/logo.png"> -->
-    <Coordinates/>
+    <Currently></Currently>
   </div>
 </template>
 
 <script>
-import Coordinates from './components/Coordinates'
+import Currently from './components/Currently'
 
 export default {
   name: 'App',
   components: {
-    Coordinates
+    Currently
   }
 }
 </script>

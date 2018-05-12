@@ -17,8 +17,7 @@ app.get('/weather', (req, res) => {
       .longitude(lon)
       .units('us')
       .language('en')
-      .exclude('minutely,daily')
-      .extendHourly(true)
+      .exclude('minutely,hourly,flags')
       .get()
       .then(response => {
         res.send(response)
