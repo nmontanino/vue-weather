@@ -4,5 +4,8 @@ const prodEnv = require('./prod.env')
 
 module.exports = merge(prodEnv, {
   NODE_ENV: '"development"',
-  API_URL: '"http://localhost:3000/weather?"'
+  API_URL: {
+    darksky: '"http://localhost:3000/weather?"',
+    googleMaps: '"http://localhost:3000/location?"'
+  }
 })

@@ -4,9 +4,11 @@ const DarkSky = require('dark-sky')
 const keys = require('./keys.js')
 
 const darksky = new DarkSky(keys.darksky)
+const googleMapsClient = require('@google/maps').createClient({
+  key: keys.googleMaps
+})
 
 const app = express()
-
 app.use(cors())
 
 app.get('/weather', (req, res) => {
@@ -29,9 +31,19 @@ app.get('/weather', (req, res) => {
     })
 })
 
-app.listen(3000, function () {
+app.get('/location', (req, res) => {
+  let latlng = req.query.latlng
+
+  googleMapsClient.reverseGeocode({
+    latlng: latlng
+  }, (error, response) => {
+    if (!error) {
+      res.send(response.json.results)
+    }
+  })
+})
+
+app.listen(3000, function() {
   console.log('> Starting API server...')
   console.log('> Listening at http://localhost:' + this.address().port)
 })
-
-module.exports = app

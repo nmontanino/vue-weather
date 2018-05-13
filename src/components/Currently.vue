@@ -1,5 +1,7 @@
 <template>
-  <div v-if="isLoaded">
+  <div class="loader" v-if="!isLoaded"></div>
+  <div v-else>
+    <h1>{{ this.city }}, {{ this.region }}, {{ this.country }}</h1>
     <h1>
       Current Temperature: {{ Math.round(weather.currently.temperature) }}
       <span class="convert" v-if="units === 'us'" @click="convertUnits('us')">&deg;F</span>
@@ -20,10 +22,6 @@
     <h2>Precipitation: {{ Math.round(weather.currently.precipProbability * 100) }}%</h2>
     <h2>Pressure: {{ weather.currently.pressure }} mbar</h2>
   </div>
-  <div v-else>
-    <!-- This will do until I can add a spinner or something -->
-    <h1>Loading...</h1>
-  </div>
 </template>
 
 <script>
@@ -31,6 +29,9 @@ export default {
   name: 'Currently',
   data () {
     return {
+      city: null,
+      region: null,
+      country: null,
       weather: {},
       lat: null,
       lon: null,
@@ -40,7 +41,7 @@ export default {
   },
   methods: {
     getCurrentWeather () {
-      fetch(`${process.env.API_URL}lat=${this.lat}&lon=${this.lon}&units=${this.units}`)
+      fetch(`${process.env.API_URL.darksky}lat=${this.lat}&lon=${this.lon}&units=${this.units}`)
         .then(response => {
           // TODO: Check if response.status == 200, then handle errors
           response.json()
@@ -55,7 +56,25 @@ export default {
         })
     },
     getLocation () {
-      // TODO: Get city name from coordinates
+      fetch(`${process.env.API_URL.googleMaps}latlng=${this.lat},${this.lon}`)
+        .then(response => {
+          // console.log(response)
+          response.json().then(data => {
+            // console.log(data)
+            let location = data[0].address_components
+            location.forEach(element => {
+              if (element.types[0] === 'locality') {
+                this.city = element.long_name
+              }
+              if (element.types[0] === 'administrative_area_level_1') {
+                this.region = element.long_name
+              }
+              if (element.types[0] === 'country') {
+                this.country = element.long_name
+              }
+            })
+          })
+        })
     },
     convertUnits (units) {
       if (units === 'us') {
@@ -81,6 +100,7 @@ export default {
           this.units = 'us'
         }
         this.getCurrentWeather()
+        this.getLocation()
       })
     } else {
       // TODO: Need to handle errors if geolocation not supported or not enabled
@@ -97,5 +117,23 @@ h1, h2 {
 .convert {
   cursor: pointer;
   color: slateblue;
+}
+.loader {
+  border: 14px solid #f3f3f3;
+  border-radius: 50%;
+  border-top: 14px solid #5e5e5e;
+  width: 70px;
+  height: 70px;
+  -webkit-animation: spin 2s linear infinite;
+  animation: spin 2s linear infinite;
+}
+@-webkit-keyframes spin {
+  0% { -webkit-transform: rotate(0deg); }
+  100% { -webkit-transform: rotate(360deg); }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 </style>
