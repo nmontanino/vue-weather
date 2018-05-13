@@ -1,20 +1,27 @@
 <template>
   <div v-if="isLoaded">
-    <h2>
+    <h1>
       Current Temperature: {{ Math.round(weather.currently.temperature) }}
       <span class="convert" v-if="units === 'us'" @click="convertUnits('us')">&deg;F</span>
       <span class="convert" v-if="units === 'si'" @click="convertUnits('si')">&deg;C</span>
-    </h2>
-    <h2>Weather Summary: {{ weather.currently.summary }}</h2>
-    <h3>
+    </h1>
+    <h1>Summary: {{ weather.currently.summary }}</h1>
+    <h2>Humidity: {{ Math.round(weather.currently.humidity * 100) }}%</h2>
+    <h2>
       Dew Point: {{ Math.round(weather.currently.dewPoint) }}
       <span v-if="units === 'us'">&deg;F</span>
       <span v-if="units === 'si'">&deg;C</span>
-    </h3>
-    <h3>Humidity: {{ Math.round(weather.currently.humidity * 100) }}%</h3>
-    <h3>Pressure: {{ weather.currently.pressure }} mbar</h3>
+    </h2>
+    <h2>
+      Wind Speed: {{ weather.currently.windSpeed }}
+      <span v-if="units === 'us'">mph</span>
+      <span v-if="units === 'si'">m/s</span>
+    </h2>
+    <h2>Precipitation: {{ Math.round(weather.currently.precipProbability * 100) }}%</h2>
+    <h2>Pressure: {{ weather.currently.pressure }} mbar</h2>
   </div>
   <div v-else>
+    <!-- This will do until I can add a spinner or something -->
     <h1>Loading...</h1>
   </div>
 </template>
@@ -35,10 +42,10 @@ export default {
     getCurrentWeather () {
       fetch(`${process.env.API_URL}lat=${this.lat}&lon=${this.lon}&units=${this.units}`)
         .then(response => {
-          // TODO: Check if response.status == 200
+          // TODO: Check if response.status == 200, then handle errors
           response.json()
             .then(data => {
-              console.log(data)
+              // console.log(data)
               this.weather = data
               this.isLoaded = true
             })
@@ -48,7 +55,7 @@ export default {
         })
     },
     getLocation () {
-      // Get city name from coordinates
+      // TODO: Get city name from coordinates
     },
     convertUnits (units) {
       if (units === 'us') {
@@ -59,6 +66,7 @@ export default {
         this.units = 'us'
       }
       // TODO: Find out a better way to do this
+      this.isLoaded = false
       this.getCurrentWeather()
     }
   },
@@ -88,5 +96,6 @@ h1, h2 {
 }
 .convert {
   cursor: pointer;
+  color: slateblue;
 }
 </style>
