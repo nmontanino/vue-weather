@@ -1,26 +1,35 @@
 <template>
   <div class="loader" v-if="!isLoaded"></div>
-  <div v-else>
-    <h1>{{ this.city }}, {{ this.region }}, {{ this.country }}</h1>
-    <h1>
-      Current Temperature: {{ Math.round(weather.currently.temperature) }}
-      <span class="convert" v-if="units === 'us'" @click="convertUnits('us')">&deg;F</span>
-      <span class="convert" v-if="units === 'si'" @click="convertUnits('si')">&deg;C</span>
-    </h1>
-    <h1>Summary: {{ weather.currently.summary }}</h1>
-    <h2>Humidity: {{ Math.round(weather.currently.humidity * 100) }}%</h2>
-    <h2>
-      Dew Point: {{ Math.round(weather.currently.dewPoint) }}
-      <span v-if="units === 'us'">&deg;F</span>
-      <span v-if="units === 'si'">&deg;C</span>
-    </h2>
-    <h2>
-      Wind Speed: {{ weather.currently.windSpeed }}
-      <span v-if="units === 'us'">mph</span>
-      <span v-if="units === 'si'">m/s</span>
-    </h2>
-    <h2>Precipitation: {{ Math.round(weather.currently.precipProbability * 100) }}%</h2>
-    <h2>Pressure: {{ weather.currently.pressure }} mbar</h2>
+  <div class="forecast-container" v-else>
+    <div class="row">
+      <div class="column">
+        <h1>{{ this.city }}, {{ this.region }}, {{ this.country }}</h1>
+        <h1>
+          Current Temperature: {{ Math.round(weather.currently.temperature) }}
+          <span class="convert" v-if="units === 'us'" @click="convertUnits('us')">&deg;F</span>
+          <span class="convert" v-if="units === 'si'" @click="convertUnits('si')">&deg;C</span>
+        </h1>
+        <h1>Summary: {{ weather.currently.summary }}</h1>
+        <h1>Humidity: {{ Math.round(weather.currently.humidity * 100) }}%</h1>
+      </div>
+      <div class="column right">
+        <div class="icon">
+          <skycon :condition="weather.currently.icon"></skycon>
+        </div>
+        <h2>
+          Dew Point: {{ Math.round(weather.currently.dewPoint) }}
+          <span v-if="units === 'us'">&deg;F</span>
+          <span v-if="units === 'si'">&deg;C</span>
+        </h2>
+        <h2>
+          Wind Speed: {{ weather.currently.windSpeed }}
+          <span v-if="units === 'us'">mph</span>
+          <span v-if="units === 'si'">m/s</span>
+        </h2>
+        <h2>Precipitation: {{ Math.round(weather.currently.precipProbability * 100) }}%</h2>
+        <h2>Pressure: {{ weather.currently.pressure }} mbar</h2>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -116,7 +125,7 @@ h1, h2 {
 }
 .convert {
   cursor: pointer;
-  color: slateblue;
+  color: slategray;
 }
 .loader {
   border: 14px solid #f3f3f3;
@@ -126,14 +135,27 @@ h1, h2 {
   height: 70px;
   -webkit-animation: spin 2s linear infinite;
   animation: spin 2s linear infinite;
+  opacity: 0.4;
 }
 @-webkit-keyframes spin {
   0% { -webkit-transform: rotate(0deg); }
   100% { -webkit-transform: rotate(360deg); }
 }
-
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+.row {
+  display: flex;
+}
+.right {
+  text-align: right;
+}
+.forecast-container {
+  min-height: 300px;
+  min-width: 800px;
+  padding: 40px 60px;
+  background-color: #fff;
+  opacity: 0.9;
 }
 </style>
