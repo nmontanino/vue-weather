@@ -1,46 +1,51 @@
 <template>
   <div class="loader" v-if="!isLoaded"></div>
-  <div class="forecast-container" v-else>
+  <div class="weather-container" v-else>
     <div class="row">
       <div class="column">
-        <h1>{{ this.city }}, {{ this.region }}, {{ this.country }}</h1>
-        <h1>
+        <h1>{{ location.city }}, {{ location.region }}, {{ location.country }}</h1>
+        <h2>{{ formatDate(weather.currently.time) }}</h2>
+        <h2>
           Current Temperature: {{ Math.round(weather.currently.temperature) }}
           <span class="convert" v-if="units === 'us'" @click="convertUnits('us')">&deg;F</span>
           <span class="convert" v-if="units === 'si'" @click="convertUnits('si')">&deg;C</span>
-        </h1>
-        <h1>Summary: {{ weather.currently.summary }}</h1>
-        <h1>Humidity: {{ Math.round(weather.currently.humidity * 100) }}%</h1>
+        </h2>
+        <h2>Summary: {{ weather.currently.summary }}</h2>
       </div>
       <div class="column right">
         <div class="icon">
           <skycon :condition="weather.currently.icon"></skycon>
         </div>
-        <h2>
+        <p>Humidity: {{ Math.round(weather.currently.humidity * 100) }}%</p>
+        <p>
           Dew Point: {{ Math.round(weather.currently.dewPoint) }}
           <span v-if="units === 'us'">&deg;F</span>
           <span v-if="units === 'si'">&deg;C</span>
-        </h2>
-        <h2>
-          Wind Speed: {{ weather.currently.windSpeed }}
+        </p>
+        <p>
+          Wind: {{ weather.currently.windSpeed }}
           <span v-if="units === 'us'">mph</span>
           <span v-if="units === 'si'">m/s</span>
-        </h2>
-        <h2>Precipitation: {{ Math.round(weather.currently.precipProbability * 100) }}%</h2>
-        <h2>Pressure: {{ weather.currently.pressure }} mbar</h2>
+        </p>
+        <p>Precipitation: {{ Math.round(weather.currently.precipProbability * 100) }}%</p>
+        <p>Pressure: {{ weather.currently.pressure }} mbar</p>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import moment from 'moment'
+
 export default {
   name: 'Currently',
   data () {
     return {
-      city: null,
-      region: null,
-      country: null,
+      location: {
+        city: null,
+        region: null,
+        country: null
+      },
       weather: {},
       lat: null,
       lon: null,
@@ -70,16 +75,16 @@ export default {
           // console.log(response)
           response.json().then(data => {
             // console.log(data)
-            let location = data[0].address_components
-            location.forEach(element => {
+            let locationData = data[0].address_components
+            locationData.forEach(element => {
               if (element.types[0] === 'locality') {
-                this.city = element.long_name
+                this.location.city = element.long_name
               }
               if (element.types[0] === 'administrative_area_level_1') {
-                this.region = element.long_name
+                this.location.region = element.long_name
               }
               if (element.types[0] === 'country') {
-                this.country = element.long_name
+                this.location.country = element.long_name
               }
             })
           })
@@ -96,6 +101,9 @@ export default {
       // TODO: Find out a better way to do this
       this.isLoaded = false
       this.getCurrentWeather()
+    },
+    formatDate (date) {
+      return moment(date * 1000).format('dddd, MMMM Do')
     }
   },
   created () {
@@ -149,13 +157,20 @@ h1, h2 {
   display: flex;
 }
 .right {
+  /* justify-content: right; */
   text-align: right;
 }
-.forecast-container {
-  min-height: 300px;
-  min-width: 800px;
+.weather-container {
+  /* min-height: 300px; */
+  /* min-width: 800px; */
   padding: 40px 60px;
   background-color: #fff;
   opacity: 0.9;
+  /* display: flex;
+  flex-direction: row;
+  height: 100%; */
+}
+.icon {
+  margin-top: 20px;
 }
 </style>

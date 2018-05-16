@@ -17,6 +17,7 @@
     "dark-sky": "^1.1.2",
     "express": "^4.16.3",
     "express-rate-limit": "^2.11.0",
+    "moment": "^2.22.1",
     "skycons": "^1.0.0",
     "vue": "^2.5.2",
     "vue-skycons": "^1.0.5",
