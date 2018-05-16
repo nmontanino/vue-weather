@@ -11,6 +11,14 @@
           <span class="convert" v-if="units === 'si'" @click="convertUnits('si')">&deg;C</span>
         </h2>
         <h2>Summary: {{ weather.currently.summary }}</h2>
+        <div class="sunrise">
+          <IconSunrise></IconSunrise>
+          <p>{{ formatTime(weather.daily.data[0].sunriseTime) }}</p>
+        </div>
+        <div class="sunset">
+          <IconSunset></IconSunset>
+          <p>{{ formatTime(weather.daily.data[0].sunsetTime) }}</p>
+        </div>
       </div>
       <div class="column right">
         <div class="icon">
@@ -35,6 +43,8 @@
 </template>
 
 <script>
+import IconSunrise from '../assets/sunrise.svg'
+import IconSunset from '../assets/sunset.svg'
 import moment from 'moment'
 
 export default {
@@ -52,6 +62,10 @@ export default {
       units: 'si',
       isLoaded: false
     }
+  },
+  components: {
+    IconSunrise,
+    IconSunset
   },
   methods: {
     getCurrentWeather () {
@@ -91,19 +105,20 @@ export default {
         })
     },
     convertUnits (units) {
+      this.isLoaded = false
       if (units === 'us') {
-        // this.weather.currently.temperature = (this.weather.currently.temperature - 32) * 5 / 9
         this.units = 'si'
       } else {
-        // this.weather.currently.temperature = this.weather.currently.temperature * 9 / 5 + 32
         this.units = 'us'
       }
       // TODO: Find out a better way to do this
-      this.isLoaded = false
       this.getCurrentWeather()
     },
     formatDate (date) {
       return moment(date * 1000).format('dddd, MMMM Do')
+    },
+    formatTime (date) {
+      return moment(date * 1000).format('h:mm a')
     }
   },
   created () {
@@ -157,18 +172,12 @@ h1, h2 {
   display: flex;
 }
 .right {
-  /* justify-content: right; */
   text-align: right;
 }
 .weather-container {
-  /* min-height: 300px; */
-  /* min-width: 800px; */
   padding: 40px 60px;
   background-color: #fff;
   opacity: 0.9;
-  /* display: flex;
-  flex-direction: row;
-  height: 100%; */
 }
 .icon {
   margin-top: 20px;
