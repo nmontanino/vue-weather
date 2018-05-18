@@ -13,4 +13,5 @@ yarn-error.log*
 *.njsproj
 *.sln
 
+# Location of API keys for DarkSky and Google maps API
 api/keys.js

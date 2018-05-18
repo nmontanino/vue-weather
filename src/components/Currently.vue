@@ -1,35 +1,35 @@
 <template>
   <div class="loader" v-if="!isLoaded"></div>
+
   <div class="weather-container" v-else>
     <div class="row">
-      <div class="column">
+      <div class="col">
         <h1>{{ location.city }}, {{ location.region }}, {{ location.country }}</h1>
-        <h2>{{ formatDate(weather.currently.time) }}</h2>
+        <h2>{{ formatTime(weather.currently.time, 'dddd, MMMM Do') }}</h2>
         <h2>
           Current Temperature: {{ Math.round(weather.currently.temperature) }}
           <span class="convert" v-if="units === 'us'" @click="convertUnits('us')">&deg;F</span>
           <span class="convert" v-if="units === 'si'" @click="convertUnits('si')">&deg;C</span>
         </h2>
         <h2>Summary: {{ weather.currently.summary }}</h2>
+
+        <!-- TODO: Align sunrise and sunset icons to time -->
         <div class="sunrise">
           <IconSunrise></IconSunrise>
-          <p>{{ formatTime(weather.daily.data[0].sunriseTime) }}</p>
+          <p>{{ formatTime(weather.daily.data[0].sunriseTime, 'h:mm a') }}</p>
         </div>
         <div class="sunset">
           <IconSunset></IconSunset>
-          <p>{{ formatTime(weather.daily.data[0].sunsetTime) }}</p>
+          <p>{{ formatTime(weather.daily.data[0].sunsetTime, 'h:mm a') }}</p>
         </div>
       </div>
-      <div class="column right">
+
+      <div class="col right">
         <div class="icon">
-          <skycon :condition="weather.currently.icon"></skycon>
+          <skycon :condition="weather.currently.icon" width="80" height="80"></skycon>
         </div>
         <p>Humidity: {{ Math.round(weather.currently.humidity * 100) }}%</p>
-        <p>
-          Dew Point: {{ Math.round(weather.currently.dewPoint) }}
-          <span v-if="units === 'us'">&deg;F</span>
-          <span v-if="units === 'si'">&deg;C</span>
-        </p>
+        <p>Dew Point: {{ Math.round(weather.currently.dewPoint) }}&deg;</p>
         <p>
           Wind: {{ weather.currently.windSpeed }}
           <span v-if="units === 'us'">mph</span>
@@ -39,7 +39,20 @@
         <p>Pressure: {{ weather.currently.pressure }} mbar</p>
       </div>
     </div>
+
+    <hr>
+
+    <!-- TODO: Move daily forecast into its own vue component -->
+    <div class="row">
+        <div class="forecast-container" v-for="(day, index) in weather.daily.data" :key="index">
+          <skycon :condition="day.icon" width="50" height="50"></skycon>
+          <p><b>{{ formatTime(day.time, 'dddd') }}</b></p>
+          <p>High: {{ Math.round(day.temperatureMax) }}&deg;</p>
+          <p>Low: {{ Math.round(day.temperatureMin) }}&deg;</p>
+        </div>
+    </div>
   </div>
+
 </template>
 
 <script>
@@ -111,14 +124,10 @@ export default {
       } else {
         this.units = 'us'
       }
-      // TODO: Find out a better way to do this
       this.getCurrentWeather()
     },
-    formatDate (date) {
-      return moment(date * 1000).format('dddd, MMMM Do')
-    },
-    formatTime (date) {
-      return moment(date * 1000).format('h:mm a')
+    formatTime (date, format) {
+      return moment(date * 1000).format(format)
     }
   },
   created () {
@@ -170,6 +179,7 @@ h1, h2 {
 }
 .row {
   display: flex;
+  justify-content: space-between;
 }
 .right {
   text-align: right;
@@ -180,6 +190,17 @@ h1, h2 {
   opacity: 0.9;
 }
 .icon {
+  margin-top: 10px;
+}
+.forecast-container {
+  text-align: center;
   margin-top: 20px;
+}
+.sunrise,
+.sunset {
+  display: inline-flex;
+}
+hr {
+  opacity: 0.2;
 }
 </style>
