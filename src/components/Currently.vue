@@ -2,32 +2,30 @@
   <div class="loader" v-if="!isLoaded"></div>
 
   <div class="weather-container" v-else>
+    <h1>{{ location.city }}, {{ location.region }}, {{ location.country }}</h1>
     <div class="row">
-      <div class="col">
-        <h1>{{ location.city }}, {{ location.region }}, {{ location.country }}</h1>
+      <div>
         <h2>{{ formatTime(weather.currently.time, 'dddd, MMMM Do') }}</h2>
-        <h2>
-          Current Temperature: {{ Math.round(weather.currently.temperature) }}
+        <h2>{{ weather.currently.summary }}</h2>
+        <div class="temp">
+          <skycon :condition="weather.currently.icon"></skycon>
+          <div>{{ Math.round(weather.currently.temperature) }}</div>
           <span class="convert" v-if="units === 'us'" @click="convertUnits('us')">&deg;F</span>
           <span class="convert" v-if="units === 'si'" @click="convertUnits('si')">&deg;C</span>
-        </h2>
-        <h2>Summary: {{ weather.currently.summary }}</h2>
+        </div>
 
         <!-- TODO: Align sunrise and sunset icons to time -->
-        <div class="sunrise">
+        <!-- <div class="sunrise">
           <IconSunrise></IconSunrise>
           <p>{{ formatTime(weather.daily.data[0].sunriseTime, 'h:mm a') }}</p>
         </div>
         <div class="sunset">
           <IconSunset></IconSunset>
           <p>{{ formatTime(weather.daily.data[0].sunsetTime, 'h:mm a') }}</p>
-        </div>
+        </div> -->
       </div>
 
-      <div class="col right">
-        <div class="icon">
-          <skycon :condition="weather.currently.icon" width="80" height="80"></skycon>
-        </div>
+      <div class="right">
         <p>Humidity: {{ Math.round(weather.currently.humidity * 100) }}%</p>
         <p>Dew Point: {{ Math.round(weather.currently.dewPoint) }}&deg;</p>
         <p>
@@ -36,7 +34,7 @@
           <span v-if="units === 'si'">m/s</span>
         </p>
         <p>Precipitation: {{ Math.round(weather.currently.precipProbability * 100) }}%</p>
-        <p>Pressure: {{ weather.currently.pressure }} mbar</p>
+        <!-- <p>Pressure: {{ weather.currently.pressure }} mbar</p> -->
       </div>
     </div>
 
@@ -44,12 +42,12 @@
 
     <!-- TODO: Move daily forecast into its own vue component -->
     <div class="row">
-        <div class="forecast-container" v-for="(day, index) in weather.daily.data" :key="index">
-          <skycon :condition="day.icon" width="50" height="50"></skycon>
-          <p><b>{{ formatTime(day.time, 'dddd') }}</b></p>
-          <p>High: {{ Math.round(day.temperatureMax) }}&deg;</p>
-          <p>Low: {{ Math.round(day.temperatureMin) }}&deg;</p>
-        </div>
+      <div class="forecast-container" v-for="(day, index) in weather.daily.data" :key="index">
+        <p>{{ formatTime(day.time, 'ddd') }}</p>
+        <skycon :condition="day.icon" :width="42" :height="42"></skycon>
+        <p>{{ Math.round(day.temperatureMax) }}&deg;</p>
+        <p>{{ Math.round(day.temperatureMin) }}&deg;</p>
+      </div>
     </div>
   </div>
 
@@ -151,56 +149,88 @@ export default {
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-h1, h2 {
-  font-weight: normal;
+<style lang="scss" scoped>
+@import '../sass/_loader.scss';
+
+h1 {
+  font-size: 28px;
+  margin-bottom: 1rem;
 }
+
+h2 {
+  font-size: 18px;
+  margin-bottom: 8px;
+}
+
 .convert {
   cursor: pointer;
   color: slategray;
+
+  &:hover {
+    color:  rgb(89, 119, 150);
+  }
 }
-.loader {
-  border: 14px solid #f3f3f3;
-  border-radius: 50%;
-  border-top: 14px solid #5e5e5e;
-  width: 70px;
-  height: 70px;
-  -webkit-animation: spin 2s linear infinite;
-  animation: spin 2s linear infinite;
-  opacity: 0.4;
-}
-@-webkit-keyframes spin {
-  0% { -webkit-transform: rotate(0deg); }
-  100% { -webkit-transform: rotate(360deg); }
-}
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-.row {
-  display: flex;
-  justify-content: space-between;
-}
-.right {
-  text-align: right;
-}
+
 .weather-container {
-  padding: 40px 60px;
+  padding: 40px 50px;
   background-color: #fff;
   opacity: 0.9;
+
+  .row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    min-width: 475px;
+
+    .right {
+      text-align: right;
+
+      p {
+        margin-bottom: 10px;
+      }
+    }
+
+    .temp {
+    padding-top: 8px;
+    font-size: 64px;
+    display: inline-flex;
+
+      span {
+        font-size: 36px;
+      }
+
+      canvas {
+        margin-right: 8px;
+      }
+    }
+  }
+
+  hr {
+  opacity: 0.2;
+  margin: 16px 0 24px 0;
+  }
 }
-.icon {
-  margin-top: 10px;
-}
+
 .forecast-container {
   text-align: center;
-  margin-top: 20px;
+
+  p:last-child {
+    opacity: 0.5;
+    margin-top: 0.25em;
+  }
+
+  &:last-child {
+    display: none;
+  }
+
+  canvas {
+    margin: 8px 0;
+  }
 }
-.sunrise,
-.sunset {
-  display: inline-flex;
-}
-hr {
-  opacity: 0.2;
-}
+
+// .sunrise,
+// .sunset {
+//   display: inline-flex;
+// }
+
 </style>
