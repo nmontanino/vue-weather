@@ -3,9 +3,12 @@
 import Vue from 'vue'
 import App from './App'
 import store from './store.js'
+import moment from 'moment'
+import VueSkyCons from 'vue-skycons'
+
+Vue.prototype.moment = moment
 
 // Vue skycons plugin
-import VueSkyCons from 'vue-skycons'
 Vue.use(VueSkyCons, { color: 'slategray' })
 
 Vue.config.productionTip = false

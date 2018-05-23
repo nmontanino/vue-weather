@@ -1,11 +1,12 @@
 <template>
-  <div class="loader" v-if="!isLoaded"></div>
+  <div v-if="!$store.state.isLoaded" class="loader"></div>
 
-  <div class="weather-container" v-else>
+  <div v-else class="weather-container">
     <h1>{{ location.city }}, {{ location.region }}, {{ location.country }}</h1>
-    <div class="row">
+
+    <div class="current">
       <div>
-        <h2>{{ formatTime(weather.currently.time, 'dddd, MMMM Do') }}</h2>
+        <h2>{{ moment(weather.currently.time * 1000).format('dddd, MMMM Do') }}</h2>
         <h2>{{ weather.currently.summary }}</h2>
         <div class="temp">
           <skycon :condition="weather.currently.icon"></skycon>
@@ -13,42 +14,23 @@
           <span class="convert" v-if="units === 'us'" @click="convertUnits('us')">&deg;F</span>
           <span class="convert" v-if="units === 'si'" @click="convertUnits('si')">&deg;C</span>
         </div>
-
-        <!-- TODO: Align sunrise and sunset icons to time -->
-        <!-- <div class="sunrise">
-          <IconSunrise></IconSunrise>
-          <p>{{ formatTime(weather.daily.data[0].sunriseTime, 'h:mm a') }}</p>
-        </div>
-        <div class="sunset">
-          <IconSunset></IconSunset>
-          <p>{{ formatTime(weather.daily.data[0].sunsetTime, 'h:mm a') }}</p>
-        </div> -->
       </div>
 
       <div class="right">
         <p>Humidity: {{ Math.round(weather.currently.humidity * 100) }}%</p>
-        <p>Dew Point: {{ Math.round(weather.currently.dewPoint) }}&deg;</p>
-        <p>
-          Wind: {{ weather.currently.windSpeed }}
-          <span v-if="units === 'us'">mph</span>
-          <span v-if="units === 'si'">m/s</span>
-        </p>
+        <!-- <p>Dew Point: {{ Math.round(weather.currently.dewPoint) }}&deg;</p> -->
+        <p>Wind: {{ weather.currently.windSpeed.toFixed(1) }} {{ windSpeedUnit }}</p>
         <p>Precipitation: {{ Math.round(weather.currently.precipProbability * 100) }}%</p>
-        <!-- <p>Pressure: {{ weather.currently.pressure }} mbar</p> -->
+        <!-- <p>Pressure: {{ weather.currently.pressure }} mb</p> -->
+        <p>Visibility: {{ weather.currently.visibility.toFixed(1) }} {{ distanceUnit }}</p>
       </div>
     </div>
 
     <hr>
 
-    <!-- TODO: Move daily forecast into its own vue component -->
-    <div class="row">
-      <div class="forecast-container" v-for="(day, index) in weather.daily.data" :key="index">
-        <p>{{ formatTime(day.time, 'ddd') }}</p>
-        <skycon :condition="day.icon" :width="42" :height="42"></skycon>
-        <p>{{ Math.round(day.temperatureMax) }}&deg;</p>
-        <p>{{ Math.round(day.temperatureMin) }}&deg;</p>
-      </div>
-    </div>
+    <forecast :weather="weather.daily.data"></forecast>
+    <info></info>
+
   </div>
 
 </template>
@@ -56,7 +38,8 @@
 <script>
 import IconSunrise from '../assets/sunrise.svg'
 import IconSunset from '../assets/sunset.svg'
-import moment from 'moment'
+import Forecast from './Forecast.vue'
+import Info from './Info.vue'
 
 export default {
   name: 'Currently',
@@ -70,28 +53,46 @@ export default {
       weather: {},
       lat: null,
       lon: null,
-      units: 'si',
-      isLoaded: false
+      units: 'si'
     }
   },
   components: {
     IconSunrise,
-    IconSunset
+    IconSunset,
+    Forecast,
+    Info
+  },
+  computed: {
+    windSpeedUnit () {
+      if (this.units === 'us') {
+        return 'mph'
+      } else {
+        return 'm/s'
+      }
+    },
+    distanceUnit () {
+      if (this.units === 'us') {
+        return 'miles'
+      } else {
+        return 'km'
+      }
+    }
   },
   methods: {
     getCurrentWeather () {
       fetch(`${process.env.API_URL.darksky}lat=${this.lat}&lon=${this.lon}&units=${this.units}`)
         .then(response => {
-          // TODO: Check if response.status == 200, then handle errors
-          response.json()
-            .then(data => {
-              // console.log(data)
-              this.weather = data
-              this.isLoaded = true
-            })
+          if (response.ok) {
+            response.json()
+              .then(data => {
+                this.weather = data
+                this.$store.commit('loading', true)
+              })
+          }
         })
         .catch(error => {
           console.log(error)
+          alert('Failed to connect to the API')
         })
     },
     getLocation () {
@@ -116,33 +117,28 @@ export default {
         })
     },
     convertUnits (units) {
-      this.isLoaded = false
+      this.$store.commit('loading', false)
       if (units === 'us') {
         this.units = 'si'
       } else {
         this.units = 'us'
       }
       this.getCurrentWeather()
-    },
-    formatTime (date, format) {
-      return moment(date * 1000).format(format)
     }
   },
   created () {
-    if (navigator.geolocation) {
+    if (!navigator.geolocation) {
+      alert('Geolocation is not supported by this browser')
+    } else {
       navigator.geolocation.getCurrentPosition(position => {
-        // console.log('Coordinates:', position.coords)
-        this.lat = position.coords.latitude
-        this.lon = position.coords.longitude
-
         if (navigator.language === 'en-US') {
           this.units = 'us'
         }
+        this.lat = position.coords.latitude
+        this.lon = position.coords.longitude
         this.getCurrentWeather()
         this.getLocation()
       })
-    } else {
-      // TODO: Need to handle errors if geolocation not supported or not enabled
     }
   }
 }
@@ -172,11 +168,11 @@ h2 {
 }
 
 .weather-container {
-  padding: 40px 50px;
+  padding: 40px 50px 20px 50px;
   background-color: #fff;
   opacity: 0.9;
 
-  .row {
+  .current {
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
@@ -191,9 +187,9 @@ h2 {
     }
 
     .temp {
-    padding-top: 8px;
-    font-size: 64px;
-    display: inline-flex;
+      padding-top: 8px;
+      font-size: 64px;
+      display: inline-flex;
 
       span {
         font-size: 36px;
@@ -206,25 +202,8 @@ h2 {
   }
 
   hr {
-  opacity: 0.2;
-  margin: 16px 0 24px 0;
-  }
-}
-
-.forecast-container {
-  text-align: center;
-
-  p:last-child {
-    opacity: 0.5;
-    margin-top: 0.25em;
-  }
-
-  &:last-child {
-    display: none;
-  }
-
-  canvas {
-    margin: 8px 0;
+    opacity: 0.2;
+    margin: 16px 0 24px 0;
   }
 }
 

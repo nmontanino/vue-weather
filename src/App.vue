@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <Currently></Currently>
+    <currently></currently>
   </div>
 </template>
 
