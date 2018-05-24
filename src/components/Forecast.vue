@@ -1,6 +1,6 @@
 <template>
   <div id="forecast">
-    <div class="day" v-for="(day, index) in weather" :key="index">
+    <div class="day" v-for="(day, index) in daily" :key="index">
       <p>{{ moment(day.time * 1000).format('ddd') }}</p>
       <skycon :condition="day.icon" :width="42" :height="42"></skycon>
       <p>{{ Math.round(day.temperatureMax) }}&deg;</p>
@@ -12,7 +12,7 @@
 <script>
 export default {
   name: 'Forecast',
-  props: ['weather']
+  props: ['daily']
 }
 </script>
 

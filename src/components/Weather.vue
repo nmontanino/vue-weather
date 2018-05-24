@@ -5,7 +5,7 @@
     <h1>{{ location.city }}, {{ location.region }}, {{ location.country }}</h1>
 
     <div class="current">
-      <div>
+      <div class="summary">
         <h2>{{ moment(weather.currently.time * 1000).format('dddd, MMMM Do') }}</h2>
         <h2>{{ weather.currently.summary }}</h2>
         <div class="temp">
@@ -17,19 +17,32 @@
       </div>
 
       <div class="right">
-        <p>Humidity: {{ Math.round(weather.currently.humidity * 100) }}%</p>
+        <ul>
+          <li>Humidity: {{ Math.round(weather.currently.humidity * 100) }}%</li>
+          <li>Wind: {{ weather.currently.windSpeed.toFixed(1) }} {{ windSpeedUnit }}</li>
+          <li>Cloud Cover: {{ Math.round(weather.currently.cloudCover * 100) }}%</li>
+          <li>Visibility: {{ weather.currently.visibility.toFixed(1) }} {{ distanceUnit }}</li>
+        </ul>
+
+        <div class="sunrise">
+          <icon-sunrise></icon-sunrise>
+          <div>{{ moment(weather.daily.data[0].sunriseTime * 1000).format('h:mm a') }}</div>
+        </div>
+        <div class="sunset">
+          <icon-sunset></icon-sunset>
+          <div>{{ moment(weather.daily.data[0].sunsetTime * 1000).format('h:mm a') }}</div>
+        </div>
+
+        <!-- <p>Precipitation: {{ Math.round(weather.currently.precipProbability * 100) }}%</p> -->
         <!-- <p>Dew Point: {{ Math.round(weather.currently.dewPoint) }}&deg;</p> -->
-        <p>Wind: {{ weather.currently.windSpeed.toFixed(1) }} {{ windSpeedUnit }}</p>
-        <p>Precipitation: {{ Math.round(weather.currently.precipProbability * 100) }}%</p>
         <!-- <p>Pressure: {{ weather.currently.pressure }} mb</p> -->
-        <p>Visibility: {{ weather.currently.visibility.toFixed(1) }} {{ distanceUnit }}</p>
+
       </div>
     </div>
-
     <hr>
 
-    <forecast :weather="weather.daily.data"></forecast>
-    <info></info>
+    <forecast :daily="weather.daily.data"></forecast>
+    <app-info></app-info>
 
   </div>
 
@@ -39,10 +52,10 @@
 import IconSunrise from '../assets/sunrise.svg'
 import IconSunset from '../assets/sunset.svg'
 import Forecast from './Forecast.vue'
-import Info from './Info.vue'
+import AppInfo from './AppInfo.vue'
 
 export default {
-  name: 'Currently',
+  name: 'Weather',
   data () {
     return {
       location: {
@@ -60,7 +73,7 @@ export default {
     IconSunrise,
     IconSunset,
     Forecast,
-    Info
+    AppInfo
   },
   computed: {
     windSpeedUnit () {
@@ -147,6 +160,7 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="scss" scoped>
 @import '../sass/_loader.scss';
+@import '../sass/_vars.scss';
 
 h1 {
   font-size: 28px;
@@ -160,34 +174,38 @@ h2 {
 
 .convert {
   cursor: pointer;
-  color: slategray;
+  color: $color-secondary;
 
   &:hover {
-    color:  rgb(89, 119, 150);
+    color: $color-hover;
   }
 }
 
 .weather-container {
-  padding: 40px 50px 20px 50px;
+  padding: 40px 45px 20px 45px;
   background-color: #fff;
   opacity: 0.9;
 
   .current {
     display: flex;
-    justify-content: space-between;
     align-items: flex-end;
-    min-width: 475px;
+
+    .summary {
+      margin-right: 32px;
+      flex-grow: 1;
+    }
 
     .right {
       text-align: right;
+      min-width: 140px;
 
-      p {
-        margin-bottom: 10px;
+      li {
+        margin-bottom: 8px;
       }
     }
 
     .temp {
-      padding-top: 8px;
+      padding-top: 12px;
       font-size: 64px;
       display: inline-flex;
 
@@ -207,9 +225,19 @@ h2 {
   }
 }
 
-// .sunrise,
-// .sunset {
-//   display: inline-flex;
-// }
+.sunrise,
+.sunset {
+  display: inline-flex;
+  margin-bottom: 8px;
+
+  div {
+    font-size: 16px;
+    margin: auto;
+  }
+
+  svg {
+    margin: 0 4px;
+  }
+}
 
 </style>

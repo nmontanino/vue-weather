@@ -1,32 +1,33 @@
 <template>
   <div id="app">
-    <currently></currently>
+    <weather></weather>
   </div>
 </template>
 
 <script>
-import Currently from './components/Currently'
+import Weather from './components/Weather'
 
 export default {
   name: 'App',
   components: {
-    Currently
+    Weather
   }
 }
 </script>
 
 <style lang="scss">
 @import 'sass/_reset.scss';
+@import 'sass/_vars.scss';
 
 html, body {
-  background-color: #2c3e50;
+  background-color: $color-bg;
 }
 
 #app {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  color: #2c3e50;
+  color: $color-primary;
   position: absolute;
   top: 50%;
   left: 50%;
