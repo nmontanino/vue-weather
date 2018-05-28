@@ -17,25 +17,29 @@
       </div>
 
       <div class="right">
+        <!-- <ul>
+          <li>Sunrise: {{ moment(weather.daily.data[0].sunriseTime * 1000).format('h:mm a') }}</li>
+          <li>Sunset: {{ moment(weather.daily.data[0].sunsetTime * 1000).format('h:mm a') }}</li>
+          <li>Dew Point: {{ Math.round(weather.currently.dewPoint) }}&deg;</li>
+          <li>Precipitation: {{ Math.round(weather.currently.precipProbability * 100) }}%</li>
+          <li>Pressure: {{ weather.currently.pressure }} mb</li>
+        </ul> -->
         <ul>
           <li>Humidity: {{ Math.round(weather.currently.humidity * 100) }}%</li>
+          <li>Dew Point: {{ Math.round(weather.currently.dewPoint) }}&deg;</li>
           <li>Wind: {{ weather.currently.windSpeed.toFixed(1) }} {{ windSpeedUnit }}</li>
           <li>Cloud Cover: {{ Math.round(weather.currently.cloudCover * 100) }}%</li>
           <li>Visibility: {{ weather.currently.visibility.toFixed(1) }} {{ distanceUnit }}</li>
         </ul>
 
-        <div class="sunrise">
+        <!-- <div class="sunrise">
           <icon-sunrise></icon-sunrise>
           <div>{{ moment(weather.daily.data[0].sunriseTime * 1000).format('h:mm a') }}</div>
         </div>
         <div class="sunset">
           <icon-sunset></icon-sunset>
           <div>{{ moment(weather.daily.data[0].sunsetTime * 1000).format('h:mm a') }}</div>
-        </div>
-
-        <!-- <p>Precipitation: {{ Math.round(weather.currently.precipProbability * 100) }}%</p> -->
-        <!-- <p>Dew Point: {{ Math.round(weather.currently.dewPoint) }}&deg;</p> -->
-        <!-- <p>Pressure: {{ weather.currently.pressure }} mb</p> -->
+        </div> -->
 
       </div>
     </div>
@@ -92,41 +96,36 @@ export default {
     }
   },
   methods: {
-    getCurrentWeather () {
-      fetch(`${process.env.API_URL.darksky}lat=${this.lat}&lon=${this.lon}&units=${this.units}`)
+    getWeather () {
+      // this.$http.get(`${process.env.API_URL.darksky}lat=${this.lat}&lon=${this.lon}&units=${this.units}`)
+      this.$http.get(`/api/weather?lat=${this.lat}&lon=${this.lon}&units=${this.units}`)
         .then(response => {
-          if (response.ok) {
-            response.json()
-              .then(data => {
-                this.weather = data
-                this.$store.commit('loading', true)
-              })
-          }
+          this.weather = response.data
+          this.$store.commit('loading', true)
         })
         .catch(error => {
           console.log(error)
-          alert('Failed to connect to the API')
         })
     },
     getLocation () {
-      fetch(`${process.env.API_URL.googleMaps}latlng=${this.lat},${this.lon}`)
+      // this.$http.get(`${process.env.API_URL.googleMaps}latlng=${this.lat},${this.lon}`)
+      this.$http.get(`/api/location?latlng=${this.lat},${this.lon}`)
         .then(response => {
-          // console.log(response)
-          response.json().then(data => {
-            // console.log(data)
-            let locationData = data[0].address_components
-            locationData.forEach(element => {
-              if (element.types[0] === 'locality') {
-                this.location.city = element.long_name
-              }
-              if (element.types[0] === 'administrative_area_level_1') {
-                this.location.region = element.long_name
-              }
-              if (element.types[0] === 'country') {
-                this.location.country = element.long_name
-              }
-            })
+          let locationData = response.data[0].address_components
+          locationData.forEach(element => {
+            if (element.types[0] === 'locality') {
+              this.location.city = element.long_name
+            }
+            if (element.types[0] === 'administrative_area_level_1') {
+              this.location.region = element.long_name
+            }
+            if (element.types[0] === 'country') {
+              this.location.country = element.long_name
+            }
           })
+        })
+        .catch(error => {
+          console.log(error)
         })
     },
     convertUnits (units) {
@@ -136,7 +135,7 @@ export default {
       } else {
         this.units = 'us'
       }
-      this.getCurrentWeather()
+      this.getWeather()
     }
   },
   created () {
@@ -149,7 +148,7 @@ export default {
         }
         this.lat = position.coords.latitude
         this.lon = position.coords.longitude
-        this.getCurrentWeather()
+        this.getWeather()
         this.getLocation()
       })
     }
@@ -182,26 +181,34 @@ h2 {
 }
 
 .weather-container {
-  padding: 40px 45px 20px 45px;
+  padding: 40px 45px 25px 45px;
   background-color: #fff;
   opacity: 0.9;
+  // min-width: 30%;
 
   .current {
     display: flex;
-    align-items: flex-end;
+    flex-wrap: wrap;
 
     .summary {
-      margin-right: 32px;
       flex-grow: 1;
     }
 
     .right {
+      align-self: flex-end;
       text-align: right;
-      min-width: 140px;
+      margin-left: 24px;
 
-      li {
-        margin-bottom: 8px;
+      ul {
+        // min-width: fit-content;
+        margin-left: 24px;
+        display: inline-block;
+
+        li {
+          margin-bottom: 8px;
+        }
       }
+
     }
 
     .temp {
@@ -225,19 +232,19 @@ h2 {
   }
 }
 
-.sunrise,
-.sunset {
-  display: inline-flex;
-  margin-bottom: 8px;
+// .sunrise,
+// .sunset {
+//   display: inline-flex;
+//   margin-bottom: 8px;
 
-  div {
-    font-size: 16px;
-    margin: auto;
-  }
+//   div {
+//     font-size: 16px;
+//     margin: auto;
+//   }
 
-  svg {
-    margin: 0 4px;
-  }
-}
+//   svg {
+//     margin: 0 4px;
+//   }
+// }
 
 </style>

@@ -5,8 +5,10 @@ import App from './App'
 import store from './store.js'
 import moment from 'moment'
 import VueSkyCons from 'vue-skycons'
+import axios from 'axios'
 
 Vue.prototype.moment = moment
+Vue.prototype.$http = axios
 
 // Vue skycons plugin
 Vue.use(VueSkyCons, { color: 'slategray' })

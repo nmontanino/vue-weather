@@ -28,6 +28,10 @@ export default {
     margin-top: 0.25em;
   }
 
+  // .day:first-child {
+  //   display: none;
+  // }
+
   canvas {
     margin: 8px 0;
   }

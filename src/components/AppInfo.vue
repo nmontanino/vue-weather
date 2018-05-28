@@ -13,8 +13,10 @@ export default {
 <style lang="scss" scoped>
 
 footer {
-  padding-top: 14px;
   text-align: right;
+  position: relative;
+  top: 15px;
+  left: 30px;
 
   a {
     font-size: 12px;

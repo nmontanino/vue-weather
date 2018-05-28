@@ -21,6 +21,7 @@ export default {
 
 html, body {
   background-color: $color-bg;
+  height: 100%;
 }
 
 #app {
@@ -28,9 +29,9 @@ html, body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: $color-primary;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: inherit;
 }
 </style>
