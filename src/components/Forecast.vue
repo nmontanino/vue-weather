@@ -28,12 +28,16 @@ export default {
     margin-top: 0.25em;
   }
 
-  // .day:first-child {
-  //   display: none;
-  // }
-
   canvas {
     margin: 8px 0;
+  }
+
+}
+
+@media screen and ( max-width: 600px) {
+  .day:nth-child(7),
+  .day:last-child {
+    display: none;
   }
 }
 

@@ -8,7 +8,7 @@ export default new Vuex.Store({
     isLoaded: false
   },
   mutations: {
-    loading (state, bool) {
+    loaded (state, bool) {
       state.isLoaded = bool
     }
   }

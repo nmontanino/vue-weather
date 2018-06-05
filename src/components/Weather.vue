@@ -2,7 +2,7 @@
   <div v-if="!$store.state.isLoaded" class="loader"></div>
 
   <div v-else class="weather-container">
-    <h1>{{ location.city }}, {{ location.region }}, {{ location.country }}</h1>
+    <h1>{{ location }}</h1>
 
     <div class="current">
       <div class="summary">
@@ -17,16 +17,16 @@
       </div>
 
       <div class="right">
-        <!-- <ul>
-          <li>Sunrise: {{ moment(weather.daily.data[0].sunriseTime * 1000).format('h:mm a') }}</li>
-          <li>Sunset: {{ moment(weather.daily.data[0].sunsetTime * 1000).format('h:mm a') }}</li>
-          <li>Dew Point: {{ Math.round(weather.currently.dewPoint) }}&deg;</li>
+        <ul>
+          <li>Sunrise: {{ moment(weather.daily.data[0].sunriseTime * 1000).format('h:mm A') }}</li>
+          <li>Sunset: {{ moment(weather.daily.data[0].sunsetTime * 1000).format('h:mm A') }}</li>
+          <!-- <li>UV Index: {{ weather.currently.uvIndex }}</li> -->
           <li>Precipitation: {{ Math.round(weather.currently.precipProbability * 100) }}%</li>
-          <li>Pressure: {{ weather.currently.pressure }} mb</li>
-        </ul> -->
+          <li>Pressure: {{ weather.currently.pressure.toFixed(1) }} mb</li>
+        </ul>
         <ul>
           <li>Humidity: {{ Math.round(weather.currently.humidity * 100) }}%</li>
-          <li>Dew Point: {{ Math.round(weather.currently.dewPoint) }}&deg;</li>
+          <!-- <li>Dew Point: {{ Math.round(weather.currently.dewPoint) }}&deg;</li> -->
           <li>Wind: {{ weather.currently.windSpeed.toFixed(1) }} {{ windSpeedUnit }}</li>
           <li>Cloud Cover: {{ Math.round(weather.currently.cloudCover * 100) }}%</li>
           <li>Visibility: {{ weather.currently.visibility.toFixed(1) }} {{ distanceUnit }}</li>
@@ -55,18 +55,14 @@
 <script>
 import IconSunrise from '../assets/sunrise.svg'
 import IconSunset from '../assets/sunset.svg'
-import Forecast from './Forecast.vue'
-import AppInfo from './AppInfo.vue'
+import Forecast from './Forecast'
+import AppInfo from './AppInfo'
 
 export default {
   name: 'Weather',
   data () {
     return {
-      location: {
-        city: null,
-        region: null,
-        country: null
-      },
+      location: '',
       weather: {},
       lat: null,
       lon: null,
@@ -97,39 +93,39 @@ export default {
   },
   methods: {
     getWeather () {
-      // this.$http.get(`${process.env.API_URL.darksky}lat=${this.lat}&lon=${this.lon}&units=${this.units}`)
-      this.$http.get(`/api/weather?lat=${this.lat}&lon=${this.lon}&units=${this.units}`)
+      this.$http.get(`${process.env.API_URL.darksky}lat=${this.lat}&lon=${this.lon}&units=${this.units}`)
         .then(response => {
           this.weather = response.data
-          this.$store.commit('loading', true)
+          this.$store.commit('loaded', true)
         })
         .catch(error => {
           console.log(error)
         })
     },
     getLocation () {
-      // this.$http.get(`${process.env.API_URL.googleMaps}latlng=${this.lat},${this.lon}`)
-      this.$http.get(`/api/location?latlng=${this.lat},${this.lon}`)
+      let formattedLocation = ''
+      this.$http.get(`${process.env.API_URL.googleMaps}latlng=${this.lat},${this.lon}`)
         .then(response => {
           let locationData = response.data[0].address_components
           locationData.forEach(element => {
             if (element.types[0] === 'locality') {
-              this.location.city = element.long_name
+              formattedLocation += element.long_name + ', '
             }
             if (element.types[0] === 'administrative_area_level_1') {
-              this.location.region = element.long_name
+              formattedLocation += element.long_name + ', '
             }
             if (element.types[0] === 'country') {
-              this.location.country = element.long_name
+              formattedLocation += element.long_name
             }
           })
+          this.location = formattedLocation
         })
         .catch(error => {
           console.log(error)
         })
     },
     convertUnits (units) {
-      this.$store.commit('loading', false)
+      this.$store.commit('loaded', false)
       if (units === 'us') {
         this.units = 'si'
       } else {
@@ -139,6 +135,7 @@ export default {
     }
   },
   created () {
+    this.$store.commit('loaded', false)
     if (!navigator.geolocation) {
       alert('Geolocation is not supported by this browser')
     } else {
@@ -162,7 +159,7 @@ export default {
 @import '../sass/_vars.scss';
 
 h1 {
-  font-size: 28px;
+  font-size: 30px;
   margin-bottom: 1rem;
 }
 
@@ -184,7 +181,6 @@ h2 {
   padding: 40px 45px 25px 45px;
   background-color: #fff;
   opacity: 0.9;
-  // min-width: 30%;
 
   .current {
     display: flex;
@@ -196,16 +192,15 @@ h2 {
 
     .right {
       align-self: flex-end;
+      display: inline-flex;
       text-align: right;
-      margin-left: 24px;
+      flex-wrap: inherit;
 
       ul {
-        // min-width: fit-content;
         margin-left: 24px;
-        display: inline-block;
 
         li {
-          margin-bottom: 8px;
+          margin-bottom: 10px;
         }
       }
 
@@ -246,5 +241,30 @@ h2 {
 //     margin: 0 4px;
 //   }
 // }
+
+@media screen and (max-width: 600px) {
+  h1, h2 {
+    font-size: 24px;
+  }
+
+  .weather-container{
+    margin: 15px;
+  }
+
+  .summary,
+  .right {
+    text-align: center;
+  }
+
+  .right {
+    justify-content: center;
+    margin: 20px auto 0 auto;
+
+    ul {
+      margin-right: 20px;
+      text-align: center;
+    }
+  }
+}
 
 </style>
